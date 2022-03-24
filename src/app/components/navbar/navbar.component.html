@@ -1,0 +1,114 @@
+<ng-sidebar-container>
+  <ng-sidebar
+    id="sidebar"
+    #sidebar
+    [(opened)]="sidebar_opened"
+    sidebarClass="shadow props"
+    mode="push"
+    position="left"
+  >
+      <div class="sidebar-main">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col my-3">
+              <h4 class="mb-0 text-white font-weight-bold main-header">
+                beyonic
+              </h4>
+              <div class="rectangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div
+        *ngFor="let item of sidebar_items"
+        class="sidebar-items clickable"
+        style="color: #fff"
+        [routerLink]="item.route"
+        routerLinkActive="orange"
+      >
+        <i [class]="item.icon + ' my-auto sidebar-item-icon'"></i>
+        <p style="font-size: 17px" class="mb-0 mx-4">{{ item.title }}</p>
+      </div>
+
+      <div
+        style="position: absolute; top: 90vh"
+        class="clickable sidebar-items"
+      >
+        <div class="container-fluid">
+          <div class="row text-white">
+            <i class="fas fa-user sidebar-item-icon"></i>
+            <div class="mb-0 mx-4">
+              <p class="mb-0 font-weight-bold">John Kowalski</p>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </div>
+  </ng-sidebar>
+
+  <div ng-sidebar-content class="scaffold content">
+    <nav class="navbar navbar-expand btn-creative px-5 mb-2">
+      <a
+        (click)="sidebar_opened = !sidebar_opened"
+        class="navbar-brand btn-creative"
+      >
+        <i class="fas fa-arrow-left"></i>
+      </a>
+
+      <a class="navbar-brand header font-weight-bold ml-3">{{
+        "Transaction"
+      }}</a>
+
+      <ul class="nav mt-0 pr-0">
+        <li class="nav-item v-align dropdown">
+          <a
+            class="navbar-brand btn-creative nav-link"
+            href="#"
+            id="navbarDropdownMenuLink"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <i class="nav-link clickable notification"> </i>
+          </a>
+        </li>
+        <li class="nav-item v-align">
+          <div class="input-group">
+            <input
+              #input
+              style="
+                border-bottom: 2px solid !important;
+                background: transparent;
+              "
+              type="text"
+              class="form-control border-0"
+              placeholder="Search..."
+            />
+            <button
+              type="button"
+              class="btn bg-transparent"
+              style="margin-left: -40px; z-index: 100"
+            >
+              <i (click)="input.value = ''" class="fa fa-times"></i>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <router-outlet></router-outlet>
+
+    <hr />
+
+    <div class="container-fluid px-5 my-3">
+      <div class="row">
+        <button class="btn btn-warning text-white">Continue</button>
+        <button class="btn btn-light mx-2">Skip</button>
+        <button class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</ng-sidebar-container>

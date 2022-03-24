@@ -1,0 +1,262 @@
+<div class="container-fluid mx-0 px-5">
+  <h5>Country of interest</h5>
+  <hr />
+  <p>Kenya</p>
+
+  <h5>Edit transactions</h5>
+  <hr />
+  <p>Edit the transactions below to match the right information</p>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <div style="width: 300px;" class="input-group mb-3">
+          <div class="input-group-prepend">
+            <button class="btn btn-outline-dark dropdown-toggle" type="button">Local &nbsp;</button>
+          </div>
+          <input #id_search (keyup)="filter('id', id_search.value)" type="text" class="form-control" placeholder="Search" aria-label="" aria-describedby="basic-addon1">
+        </div>
+      </div>
+
+
+      <div class="dropdown">
+        <button class="btn btn-light mx-2 dropdown-toggle" type="button" id="toggler" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Filter
+        </button>
+        <div class="dropdown-menu" aria-labelledby="toggler">
+          <a class="dropdown-item" >anything</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-light mx-2 dropdown-toggle" type="button" id="toggler" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Export as
+        </button>
+        <div class="dropdown-menu" aria-labelledby="toggler">
+          <a class="dropdown-item" >anything</a>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input
+          style="width: 250px"
+          autocomplete="off"
+          id="picker"
+          #date_search
+          class="flatpickr flatpickr-input active form-control"
+          type="text"
+          (change)="filter('date', date_search.value)"
+          [placeholder]="'Start date - End date'"
+        />
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">
+          <input (click)="$event.preventDefault(); select_all()" class="clickable" type="checkbox">
+        </th>
+        <th scope="col">Value Date</th>
+        <th scope="col">Transaction ID</th>
+        <th scope="col">Movement type</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Status</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+      class="transaction"
+      [ngClass]="{'selected': transaction.selected}"
+      *ngFor="let transaction of filtered_transactions">
+        <th scope="row">
+          <input [(ngModel)]="transaction.selected" type="checkbox">
+        </th>
+        <td>{{ transaction.date }}</td>
+        <td>{{ transaction.id }}</td>
+        <td>{{ transaction.movement }}</td>
+        <td style="max-width: 120px">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col">
+                {{
+                  transaction.view_amount ? transaction.amount : "●●●●●●●●●●●●"
+                }}
+              </div>
+              <i
+                (click)="transaction.view_amount = !transaction.view_amount"
+                class="fas clickable"
+                [ngClass]="{
+                  'fa-eye': transaction.view_amount,
+                  'fa-eye-slash': !transaction.view_amount
+                }"
+              ></i>
+            </div>
+          </div>
+        </td>
+        <td
+          [ngClass]="{
+            'text-success': transaction.status == 'Active',
+            'text-danger': transaction.status == 'Error',
+            'text-warning': transaction.status == 'Hold'
+          }"
+        >
+          {{ transaction.status }}
+        </td>
+        <td>
+          <i
+            (click)="selected_transaction = transaction; toggle_picker()"
+            class="fas fa-edit mx-1"
+            data-target="#editModal"
+            data-toggle="modal"
+          ></i>
+          <i
+            (click)="selected_transaction = transaction"
+            class="fas fa-trash mx-1 clickable"
+            data-target="#deleteModal"
+            data-toggle="modal"
+          ></i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div
+  class="modal fade"
+  id="deleteModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteModalTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalTitle">Delete row?</h5>
+      </div>
+      <div class="modal-body">
+        <p>This action cannot be undone. Do you want to continue?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+        <button
+          (click)="remove_transaction()"
+          type="button"
+          class="btn btn-danger"
+        >
+          Delete row
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="editModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="editModalTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalTitle">Edit row information</h5>
+      </div>
+      <div *ngIf="selected_transaction" class="modal-body">
+        <form
+          #editForm="ngForm"
+          id="editForm"
+          (ngSubmit)="edit_transaction(editForm)"
+        >
+          <div class="row mt-3">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label>Value date</label>
+
+                <input
+                  required
+                  autocomplete="off"
+                  id="modal_picker"
+                  class="flatpickr flatpickr-input active form-control"
+                  type="text"
+                  required
+                  name="date"
+                  [ngModel]="selected_transaction.date"
+                  #date_input="ngModel"
+                  placeholder="Value date"
+                />
+
+                <small
+                  *ngIf="
+                    (date_input.errors
+                      ? date_input.errors['required']
+                      : false) && date_input.touched
+                  "
+                >
+                  This field is required
+                </small>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label>Movement type</label>
+                <input
+                  name="movement"
+                  [ngModel]="selected_transaction.movement"
+                  #movement_input="ngModel"
+                  type="text"
+                  class="form-control"
+                  placeholder="Movement type"
+                />
+
+                <small
+                  *ngIf="
+                    (movement_input.errors
+                      ? movement_input.errors['required']
+                      : false) && movement_input.touched
+                  "
+                >
+                  This field is required
+                </small>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label>Status</label>
+                <select
+                  [ngModel]="selected_transaction.status"
+                  name="status"
+                  class="custom-select"
+                >
+                  <option
+                    *ngFor="let status of ['Active', 'Error', 'Hold']"
+                    [value]="status"
+                  >
+                    {{ status }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+        <button form="editForm" type="submit" class="btn btn-warning">
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
